@@ -1,0 +1,22 @@
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Virtual Environment
+venv/
+env/
+
+# Logs
+*.log
+
+# IDE và Editor
+.vscode/
+.idea/
+
+# System files
+.DS_Store
+
+# Byte-compiled files
+*.swp
