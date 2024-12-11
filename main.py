@@ -5,17 +5,6 @@ from sklearn.model_selection import train_test_split
 def print_data(path):
     data = load_data(path)
     print(data.head())  # Display the first few rows of the dataset
-def clear_data_save_data(path):
-    data = load_data(path)
-    if data is not None:
-            # Preprocess text
-        data['clean_text'] = data['text'].apply(clean_text)
-        # Save the processed data
-        path_output = "sentiment140/processed_training.400000.csv"
-        save_data(data, path_output)
-        print(f"Processed data saved to {path_output}")
-    else:
-        print("Data loading failed.")
 def fit_transform_data(path_data):
     data_clean = load_data(path_output)
     if data_clean is not None:
@@ -41,11 +30,6 @@ def train_test_split_data(x,dataset,strings=None):
 # Main code execution
 if __name__ == '__main__':
     # Load data
-
-    '''Chạy để lấy data và triển khai clean data'''
-    path_data = "sentiment140/training.400000.csv"
-    clear_data_save_data(path_data)
-
     path_output = "sentiment140/processed_training.400000.csv"
     data = load_data(path_output)
     X = fit_transform_data(path_output)
