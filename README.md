@@ -7,7 +7,7 @@ Dự án này sử dụng bộ dữ liệu Sentiment140 để thực hiện phâ
 python -m venv data_preprocessing
 ````
 ``` python
-data_preprocessing\Scripts\activat
+data_preprocessing\Scripts\activate
 ```
 e   # Windows
 # source data_preprocessing/bin/activate  # macOS/Linux
@@ -25,4 +25,35 @@ Số 2: Tách dữ liệu
 ```
 python get400kdata.py
 
+```
+# Hủy môi trường
+```
+deactivate
+```
+
+#  Tạo requirements.txt
+```
+pip freeze > requirements.txt
+```
+
+
+# Thực thi lệnh nltk.download
+chạy môi trường ảo
+```
+data_preprocessing\Scripts\activate
+```
+chạy tiếp
+```
+python
+```
+```
+import nltk
+nltk.download('stopwords')
+nltk.download('punkt')
+nltk.download('wordnet')
+```
+
+Thoát
+```
+exit()
 ```
