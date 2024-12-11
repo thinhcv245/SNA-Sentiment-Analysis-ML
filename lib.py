@@ -5,6 +5,8 @@ import nltk
 import string
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
 # Download necessary NLTK resources
 
 # Set up stopwords and lemmatizer
@@ -29,3 +31,7 @@ def save_data(data, file_path):
         print(f"Data saved to {file_path}")
     except Exception as e:
         print(f"Error saving data: {e}")
+
+def print_data(path):
+    data = load_data(path)
+    print(data.head())  # Display the first few rows of the dataset
