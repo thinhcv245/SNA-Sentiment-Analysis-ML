@@ -4,10 +4,90 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import classification_report
 import joblib
 import os
+import time
+import threading
 from sklearn.svm import SVC
+from sklearn.metrics import classification_report, accuracy_score
+
 
 #biến cục bộ
-vectorizer = TfidfVectorizer(max_features=5000)
+#vectorizer = TfidfVectorizer(max_features=5000)
+vectorizer = TfidfVectorizer()
+
+class Timer:
+    def __init__(self):
+        self.start_time = None
+        self.running = False
+
+    def start(self):
+        """Bắt đầu hiển thị thời gian liên tục."""
+        self.start_time = time.time()
+        self.running = True
+        threading.Thread(target=self._display_time, daemon=True).start()
+
+    def _display_time(self):
+        """Hiển thị thời gian đã chạy mỗi giây trên một dòng."""
+        while self.running:
+            elapsed_time = time.time() - self.start_time
+            print(f"\rElapsed Time: {elapsed_time:.2f} seconds", end="", flush=True)  # Hiển thị trên cùng một dòng
+            time.sleep(1)
+
+    def stop(self):
+        """Dừng hiển thị thời gian và trả về tổng thời gian."""
+        self.running = False
+        elapsed_time = time.time() - self.start_time
+        print(f"\rTotal Time: {elapsed_time:.2f} seconds")  # In tổng thời gian
+        return elapsed_time
+    
+def print_classification_report(y_true, y_pred, labels=None, target_names=None):
+    """
+    Hàm tùy chỉnh để hiển thị classification report chi tiết.
+
+    Args:
+        y_true (list or array): Nhãn thật.
+        y_pred (list or array): Nhãn dự đoán.
+        labels (list, optional): Danh sách các nhãn để báo cáo. Mặc định là None.
+        target_names (list, optional): Danh sách tên các nhãn. Mặc định là None.
+
+    Returns:
+        None: Chỉ in ra báo cáo.
+    """
+    # Báo cáo tổng quát từ sklearn
+    report = classification_report(y_true, y_pred, labels=labels, target_names=target_names)
+    
+    # Độ chính xác (accuracy)
+    accuracy = accuracy_score(y_true, y_pred)
+    
+    print("\n===== Classification Report =====")
+    print(report)
+    print(f"Overall Accuracy: {accuracy:.2%}")
+    print("=================================\n")
+vectorizer = TfidfVectorizer()
+from sklearn.metrics import classification_report, accuracy_score
+
+def print_classification_report(y_true, y_pred, labels=None, target_names=None):
+    """
+    Hàm tùy chỉnh để hiển thị classification report chi tiết.
+
+    Args:
+        y_true (list or array): Nhãn thật.
+        y_pred (list or array): Nhãn dự đoán.
+        labels (list, optional): Danh sách các nhãn để báo cáo. Mặc định là None.
+        target_names (list, optional): Danh sách tên các nhãn. Mặc định là None.
+
+    Returns:
+        None: Chỉ in ra báo cáo.
+    """
+    # Báo cáo tổng quát từ sklearn
+    report = classification_report(y_true, y_pred, labels=labels, target_names=target_names)
+    
+    # Độ chính xác (accuracy)
+    accuracy = accuracy_score(y_true, y_pred)
+    
+    print("\n===== Classification Report =====")
+    print(report)
+    print(f"Overall Accuracy: {accuracy:.2%}")
+    print("=================================\n")
 
 def load_model(dir_model_path, dir_vectorizer_path):
     # Tải mô hình và vectorizer từ tệp
@@ -38,14 +118,18 @@ def split_dataset(data):
 def training_native_bayes(data, model_dir):
     # Kiểm tra và xử lý các giá trị NaN trong cột clean_text
     # Huấn luyện Naive Bayes
+    # Khởi tạo Timer
+    timer = Timer()
+    timer.start()
+
     X_train, X_test, y_train, y_test = split_dataset(data)
     print("Training Naive Bayes...")
     model_nb = MultinomialNB()
     model_nb.fit(X_train, y_train)
-
+    timer.stop()
     # Dự đoán và đánh giá
     y_pred = model_nb.predict(X_test)
-    print("Classification Report:\n", classification_report(y_test, y_pred))
+    print_classification_report(y_test, y_pred, labels=[0, 1], target_names=["Negative", "Positive"])
 
     # Kiểm tra và tạo thư mục lưu mô hình nếu chưa tồn tại
     if not os.path.exists(model_dir):
@@ -64,6 +148,10 @@ def training_native_bayes(data, model_dir):
 def training_SVM(data, model_dir):
     model_svm = SVC(kernel='linear', C=1.0)
 
+    timer =Timer()
+
+    # Bắt đầu đo thời gian
+    timer.start()
     X_train, X_test, y_train, y_test = split_dataset(data)
     print("Training Support Vector Machine...")
 
@@ -71,7 +159,11 @@ def training_SVM(data, model_dir):
 
     # Dự đoán và đánh giá
     y_pred_svm = model_svm.predict(X_test)
-    print(classification_report(y_test, y_pred_svm))
+    # print(classification_report(y_test, y_pred_svm))
+    print_classification_report(y_test, y_pred_svm, labels=[0, 1], target_names=["Negative", "Positive"])
+
+    timer.stop()
+
     if not os.path.exists(model_dir):
         os.makedirs(model_dir)
     

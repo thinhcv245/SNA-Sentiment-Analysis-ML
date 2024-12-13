@@ -1,12 +1,21 @@
 from lib import load_data
-from algorithm.algorithm_training import training_native_bayes, load_model
+from algorithm.algorithm_training import training_native_bayes, load_model,training_SVM
 
-def training_native_bayes_v(path_output = "sentiment140/processed_training.400000.csv",model_dir = 'model/native_bayes/'):
+def training_native_bayes_v(path_output = "sentiment140/processed_training.1600000.csv",model_dir = 'model/native_bayes/'):
      # Load data
     data = load_data(path_output)
     '''Tạo model '''
     model, vectorizer = training_native_bayes(data, model_dir)
+    return model
+
     
+def training_SVM_v(path_output = "sentiment140/processed_training.1600000.csv",model_dir = 'model/SVM/'):
+     # Load data
+    data = load_data(path_output)
+    '''Tạo model '''
+    model = training_SVM(data, model_dir)
+    return model
+
 def check_data_native_bayes(new_data):
     model_dir = 'model/native_bayes/'
     dir_model_path = model_dir + 'naive_bayes_model.pkl'
@@ -19,6 +28,12 @@ def check_data_native_bayes(new_data):
 
 # Main code execution
 if __name__ == '__main__':
-    new_data = ["I Am Hungry"]
-    result = check_data_native_bayes(new_data)
+    
+    
+    #training_native_bayes_v()
+    # new_data = ["I Am Hungry"]
+    # result = check_data_native_bayes(new_data)
+    # print(result)
+    training_SVM_v()
+
 
