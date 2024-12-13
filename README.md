@@ -16,12 +16,18 @@ e   # Windows
 ```
 pip install -r requirements.txt
 ```
-# Chạy theo thứ tự 
+# Download and clean data
+
+```
+python main.py
+```
+
+# Chạy theo thứ tự  nếu muốn tách dữ liệu
 Số 1: Tải dữ liệu
 ```
 python dowloat_datasets.py
 ```
-Số 2: Tách dữ liệu
+Số 2: Tách dữ liệu còn 400k
 ```
 python get400kdata.py
 

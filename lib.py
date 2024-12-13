@@ -24,11 +24,12 @@ def load_data(file_path):
         return None
 def save_data(data, file_path):
     """Save processed data to a CSV file"""
-    try:
-        data.to_csv(file_path, index=False, encoding='latin-1')
-        print(f"Data saved to {file_path}")
-    except Exception as e:
-        print(f"Error saving data: {e}")
+    if not os.path.exists(file_path):
+        # Nếu không tồn tại, tạo mới và lưu
+        data.to_csv(file_path, index=False)
+        print(f"File đã được tạo và lưu tại {file_path}")
+    else:
+        print(f"File {file_path} đã tồn tại.")
 
 # Preprocessing Functions
 def remove_URL(text):
