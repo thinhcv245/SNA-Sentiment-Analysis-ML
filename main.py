@@ -1,7 +1,7 @@
 import pandas as pd
 import joblib
 from lib import load_data
-from algorithm.algorithm_training import training_native_bayes, load_model,training_SVM,training_SVM_V2, training_logistic_regression
+from algorithm.algorithm_training import training_native_bayes, load_model,training_SVM,training_SVM_V2
 
 def training_native_bayes_v(path_output = "sentiment140/processed_training.1600000.csv",model_dir = 'model/native_bayes/'):
      # Load data
@@ -65,3 +65,7 @@ if __name__ == '__main__':
     # training_SVM_v2_update()
     # result = check_data_SVM(new_data)
     # print(result)
+
+
+    # training_native_bayes_v(path_output = "sentiment140/elon_musk_tweets_dataset.csv",model_dir = 'model/elon_musk/native_bayes/')
+    # training_SVM_v2_update(path_output = "sentiment140/elon_musk_tweets_dataset.csv",model_dir = 'model/elon_musk/svm/')
