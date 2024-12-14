@@ -9,12 +9,6 @@ def training_native_bayes_v(path_output = "sentiment140/processed_training.16000
     '''Tạo model '''
     model, vectorizer = training_native_bayes(data, model_dir)
     return model
-def training_logistic_regression_v(path_output = "sentiment140/processed_training.1600000.csv",model_dir = 'model/logistic_regression/'):
-     # Load data
-    data = load_data(path_output)
-    '''Tạo model '''
-    model = training_logistic_regression(data, model_dir)
-    return model
     
 def training_SVM_v(path_output = "sentiment140/processed_training.1600000.csv",model_dir = 'model/SVM/'):
      # Load data
@@ -71,8 +65,3 @@ if __name__ == '__main__':
     # training_SVM_v2_update()
     # result = check_data_SVM(new_data)
     # print(result)
-
-    training_logistic_regression_v()
-
-
-

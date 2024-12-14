@@ -126,7 +126,7 @@ def training_native_bayes(data, model_dir):
     timer = Timer()
     timer.start()
 
-    X_train, X_test, y_train, y_test, vectorizer = split_dataset(data,max_features = 5000)
+    X_train, X_test, y_train, y_test, vectorizer = split_dataset(data, max_features = 5000)
     print("Training Naive Bayes...")
     model_nb = MultinomialNB()
     model_nb.fit(X_train, y_train)
@@ -218,26 +218,5 @@ def training_SVM_V2(data, model_dir):
     return model_svm
 
 
-def training_logistic_regression(data, model_dir):
-    max_iter=1000
-    X_train, X_test, y_train, y_test, vectorizer = split_dataset(data)
-    print(" \t Logistic Regression... \n")
-    timer =Timer()
-    timer.start()
-    model_lr = LogisticRegression(max_iter)
-    model_lr.fit(X_train, y_train)
-
-    # Dự đoán và đánh giá
-    y_pred_lr = model_lr.predict(X_test)
-    print_classification_report(y_test, y_pred_lr, labels=[0, 1], target_names=["Negative", "Positive"])
-    timer.stop()
-    if not os.path.exists(model_dir):
-        os.makedirs(model_dir)
-    
-      # Save the model and vectorizer
-    joblib.dump(model_lr, os.path.join(model_dir, 'logistic_regeression_model.pkl'))  # Save the SVM model
-    joblib.dump(max_iter, os.path.join(model_dir, 'tfidf_vectorizer.pkl'))  # Save the vectorizer
-    print(f"Model and vectorizer saved to {model_dir}")
-    return model_lr
 
 ''' Mô Hình học sâu'''
