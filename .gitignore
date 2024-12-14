@@ -20,3 +20,5 @@ env/
 
 # Byte-compiled files
 *.swp
+
+*.csv
