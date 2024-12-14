@@ -7,13 +7,16 @@ def download_datasets():
     path = kagglehub.dataset_download("kazanova/sentiment140")
     print("Path to dataset files:", path)
     return path
-
+def download_datasets_elon_musk_tweets():
+    # Download latest version
+    path = kagglehub.dataset_download("gpreda/elon-musk-tweets")
+    print("Path to dataset files:", path)
+    return path
 def move_datasets(path, target_path ):
     shutil.move(path, target_path)
     print(f"Dataset moved to: {target_path}")
 
-def AoutoDowloadDatasets():
-    path = download_datasets()
+def AoutoDowloadDatasets(path):
     #di chuyển dataset đến thư mục 
     target_path = "./sentiment140"
     move_datasets(path, target_path)
