@@ -3,14 +3,12 @@ import os
 import time
 import threading
 from sklearn.svm import LinearSVC
-from sklearn.decomposition import PCA
+from sklearn.decomposition import PCA, TruncatedSVD
 from sklearn.svm import SVC
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.metrics import classification_report
 from sklearn.metrics import classification_report, accuracy_score
-from sklearn.linear_model import LogisticRegression
 
 
 
@@ -64,6 +62,20 @@ def print_classification_report(y_true, y_pred, labels=None, target_names=None):
     print(report)
     print(f"Overall Accuracy: {accuracy:.2%}")
     print("=================================\n")
+def tune_svm_parameters(X_train, y_train):
+    """
+    Tối ưu hóa tham số SVM bằng GridSearchCV.
+    """
+    param_grid = {
+        'C': [0.1, 1, 10],
+        'gamma': ['scale', 'auto'],
+        'kernel': ['linear', 'rbf', 'poly']
+    }
+
+    grid_search = GridSearchCV(SVC(), param_grid, refit=True, verbose=3, n_jobs=-1)
+    grid_search.fit(X_train, y_train)
+    print("Best parameters found: ", grid_search.best_params_)
+    return grid_search.best_estimator_
 
 def print_classification_report(y_true, y_pred, output_dir,labels=None, target_names=None):
 
@@ -195,7 +207,7 @@ def training_SVM_V2(data, model_dir):
 
     # Chia dữ liệu thành tập train/test
     X_train, X_test, y_train, y_test = train_test_split(X_tfidf_pca, y, test_size=0.2, random_state=42)
-
+  
     print(" \t Training Support Vector Machine... \n")
     # Huấn luyện mô hình
     model_svm.fit(X_train, y_train)
@@ -218,5 +230,53 @@ def training_SVM_V2(data, model_dir):
     return model_svm
 
 
+def training_SVM_V3(data, model_dir):
+    """
+    Huấn luyện SVM với PCA và LinearSVC để giảm thời gian chạy.
+    """
+    model_svm = LinearSVC(C=1.0, max_iter=1000, dual=False)
 
+    timer = Timer()
+    timer.start()
+    data['target'] = data['target'].map({0: 0, 4: 1})  # Chuyển 4 thành 1
+
+    # Xử lý dữ liệu và nhãn
+    X = data['clean_text'] # Thay thế NaN bằng chuỗi rỗng
+    y = data['target']
+    X = X.fillna('').astype(str)
+
+    # Vector hóa dữ liệu
+    vectorizer = TfidfVectorizer(max_features=3000)  # Giới hạn 1000 từ phổ biến nhất
+    X_tfidf = vectorizer.fit_transform(X)
+
+    # Giảm số chiều bằng PCA
+    pca = PCA(n_components = 100)  # Chỉ giữ lại 100 thành phần chính
+    X_tfidf_pca = pca.fit_transform(X_tfidf.toarray())
+
+    # Chia dữ liệu thành tập train/test
+    X_train, X_test, y_train, y_test = train_test_split(X_tfidf_pca, y, test_size=0.2, random_state=42)
+    best_svm_model = tune_svm_parameters(X_train, y_train)
+
+    print(best_svm_model)
+
+    print(" \t Training Support Vector Machine... \n")
+    # Huấn luyện mô hình
+    model_svm.fit(X_train, y_train)
+
+    # Dự đoán và đánh giá
+    y_pred_svm = model_svm.predict(X_test)
+    print_classification_report(y_test, y_pred_svm, model_dir, labels=[0, 1], target_names=["Negative", "Positive"])
+
+    timer.stop()
+
+    if not os.path.exists(model_dir):
+        os.makedirs(model_dir)
+
+    # Lưu mô hình và vectorizer
+    joblib.dump(model_svm, os.path.join(model_dir, 'svm_model.pkl'))
+    joblib.dump(vectorizer, os.path.join(model_dir, 'tfidf_vectorizer.pkl'))
+    joblib.dump(pca, os.path.join(model_dir, 'pca.pkl'))
+
+    print(f"Model, vectorizer, and PCA saved to {model_dir}")
+    return model_svm
 ''' Mô Hình học sâu'''
