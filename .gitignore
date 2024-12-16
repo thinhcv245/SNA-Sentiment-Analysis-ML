@@ -4,8 +4,10 @@ data_preprocessing/
 .env/
 sentiment140/*
 !sentiment140/
-
-
+visualization/gephi/*
+!visualization/gephi/
+visualization/gephi2/*
+!visualization/gephi2/
 
 # Ignore Python cache files
 __pycache__/
