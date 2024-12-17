@@ -1,8 +1,10 @@
 import pandas as pd
 import re
+import os
 
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Load Sentiment140 dataset
-data = pd.read_csv("data/raw/dataset_base.csv", encoding='latin-1', header=None)
+data = pd.read_csv(os.path.join(base_dir, "data/raw/sentiment140.csv"), encoding='latin-1', header=None)
 data.columns = ["target", "id", "date", "flag", "user", "text"]
 
 # Chỉ giữ các cột cần thiết
@@ -52,13 +54,19 @@ for user in user_set:
     target = user_target_map.get(user, -1)  # Nếu user không có trong dataset, gán target = 0
     nodes.append((user, target))
 
-nodes_df = pd.DataFrame(nodes, columns=["Label", "Setiment"])
-nodes_df["Id"] = range(1, len(nodes_df) + 1)
-nodes_df = nodes_df[["Id", "Label", "Setiment"]]
-print(f"Số lượng nodes: {len(nodes)}")
-nodes_df.to_csv("nodes.csv", index=False)
-
 edges_list = [(source, target, weight) for (source, target), weight in edges.items()]
 edges_df = pd.DataFrame(edges_list, columns=["Source", "Target", "Weight"])
 print(f"Số lượng edges: {len(edges)}")
-edges_df.to_csv("edges.csv", index=False)
+edges_df.to_csv(os.path.join(base_dir, "data/processed/sentiment140/edges.csv"), index=False)
+
+nodes_df = pd.DataFrame(nodes, columns=["Label", "Setiment"])
+nodes_df["Id"] = range(1, len(nodes_df) + 1)
+nodes_df = nodes_df[["Id", "Label", "Setiment"]]
+
+# Trích xuất danh sách node từ Source và Target trong edges_df
+valid_labels = set(edges_df["Source"]).union(set(edges_df["Target"]))
+# Lọc nodes_df để giữ lại những Label có trong danh sách valid_labels
+filtered_nodes_df = nodes_df[nodes_df["Label"].isin(valid_labels)]
+
+print(f"Số lượng nodes: {len(filtered_nodes_df)}")
+filtered_nodes_df.to_csv(os.path.join(base_dir, "data/processed/sentiment140/nodes.csv"), index=False)

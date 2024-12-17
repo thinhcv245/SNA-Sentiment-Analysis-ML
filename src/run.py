@@ -2,7 +2,7 @@ import pandas as pd
 import re
 
 # Load Sentiment140 dataset
-data = pd.read_csv("data/raw/dataset_base.csv", encoding='latin-1', header=None)
+data = pd.read_csv("data/raw/Sentiment140.csv", encoding='latin-1', header=None)
 data.columns = ["target", "id", "date", "flag", "user", "text"]
 
 # Chỉ giữ các cột cần thiết
