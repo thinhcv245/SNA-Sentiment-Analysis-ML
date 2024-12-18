@@ -9,7 +9,9 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import classification_report, accuracy_score
-
+from gensim.models import Word2Vec
+from sklearn.naive_bayes import GaussianNB
+from sklearn.preprocessing import StandardScaler
 
 
 #biến cục bộ
@@ -40,18 +42,6 @@ class Timer:
         return elapsed_time
     
 def print_classification_report(y_true, y_pred, labels=None, target_names=None):
-    """
-    Hàm tùy chỉnh để hiển thị classification report chi tiết.
-
-    Args:
-        y_true (list or array): Nhãn thật.
-        y_pred (list or array): Nhãn dự đoán.
-        labels (list, optional): Danh sách các nhãn để báo cáo. Mặc định là None.
-        target_names (list, optional): Danh sách tên các nhãn. Mặc định là None.
-
-    Returns:
-        None: Chỉ in ra báo cáo.
-    """
     # Báo cáo tổng quát từ sklearn
     report = classification_report(y_true, y_pred, labels=labels, target_names=target_names)
     
@@ -138,7 +128,7 @@ def training_native_bayes(data, model_dir):
     timer = Timer()
     timer.start()
 
-    X_train, X_test, y_train, y_test, vectorizer = split_dataset(data, max_features = 5000)
+    X_train, X_test, y_train, y_test, vectorizer = split_dataset(data, 20000)
     print("Training Naive Bayes...")
     model_nb = MultinomialNB()
     model_nb.fit(X_train, y_train)
@@ -229,54 +219,55 @@ def training_SVM_V2(data, model_dir):
     print(f"Model, vectorizer, and PCA saved to {model_dir}")
     return model_svm
 
+# Hàm chuyển văn bản thành vector Word2Vec
+def text_to_vector(text, word2vec_model):
+    words = text.lower().split()
+    vectors = [word2vec_model.wv[word] for word in words if word in word2vec_model.wv]
+    return np.mean(vectors, axis=0) if vectors else np.zeros(word2vec_model.vector_size)
 
-def training_SVM_V3(data, model_dir):
-    """
-    Huấn luyện SVM với PCA và LinearSVC để giảm thời gian chạy.
-    """
-    model_svm = LinearSVC(C=1.0, max_iter=1000, dual=False)
 
-    timer = Timer()
-    timer.start()
-    data['target'] = data['target'].map({0: 0, 4: 1})  # Chuyển 4 thành 1
+# Hàm huấn luyện Naive Bayes sử dụng Word2Vec
+def training_naive_bayes_word2vec(data, model_dir, word2vec_model):
+    # Kiểm tra và xử lý các giá trị NaN trong cột clean_text
+    data = data.dropna(subset=["clean_text"])  # Loại bỏ các giá trị NaN
 
-    # Xử lý dữ liệu và nhãn
-    X = data['clean_text'] # Thay thế NaN bằng chuỗi rỗng
-    y = data['target']
-    X = X.fillna('').astype(str)
+    # Khởi tạo Timer
+    timer_start = time()
 
-    # Vector hóa dữ liệu
-    vectorizer = TfidfVectorizer(max_features=3000)  # Giới hạn 1000 từ phổ biến nhất
-    X_tfidf = vectorizer.fit_transform(X)
+    # Chuyển văn bản thành vector Word2Vec
+    data['text_vector'] = data['clean_text'].apply(lambda x: text_to_vector(x, word2vec_model))
 
-    # Giảm số chiều bằng PCA
-    pca = PCA(n_components = 100)  # Chỉ giữ lại 100 thành phần chính
-    X_tfidf_pca = pca.fit_transform(X_tfidf.toarray())
+    # Chuẩn bị dữ liệu huấn luyện
+    X = np.stack(data['text_vector'].to_numpy())
+    y = data['label'].to_numpy()  # Cột nhãn
 
-    # Chia dữ liệu thành tập train/test
-    X_train, X_test, y_train, y_test = train_test_split(X_tfidf_pca, y, test_size=0.2, random_state=42)
-    best_svm_model = tune_svm_parameters(X_train, y_train)
+    # Tách dữ liệu train-test
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    print(best_svm_model)
+    # Chuẩn hóa dữ liệu (GaussianNB cần dữ liệu chuẩn hóa)
+    scaler = StandardScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
 
-    print(" \t Training Support Vector Machine... \n")
-    # Huấn luyện mô hình
-    model_svm.fit(X_train, y_train)
+    # Huấn luyện Gaussian Naive Bayes
+    print("Training Naive Bayes with Word2Vec...")
+    model_nb = GaussianNB()
+    model_nb.fit(X_train, y_train)
 
     # Dự đoán và đánh giá
-    y_pred_svm = model_svm.predict(X_test)
-    print_classification_report(y_test, y_pred_svm, model_dir, labels=[0, 1], target_names=["Negative", "Positive"])
+    y_pred = model_nb.predict(X_test)
+    print("Classification Report:")
+    from sklearn.metrics import classification_report
+    print(classification_report(y_test, y_pred, target_names=["Negative", "Positive"]))
 
-    timer.stop()
-
+    # Lưu mô hình và scaler
     if not os.path.exists(model_dir):
         os.makedirs(model_dir)
+    joblib.dump(model_nb, os.path.join(model_dir, 'naive_bayes_word2vec.pkl'))  # Lưu mô hình
+    joblib.dump(scaler, os.path.join(model_dir, 'scaler.pkl'))  # Lưu scaler
 
-    # Lưu mô hình và vectorizer
-    joblib.dump(model_svm, os.path.join(model_dir, 'svm_model.pkl'))
-    joblib.dump(vectorizer, os.path.join(model_dir, 'tfidf_vectorizer.pkl'))
-    joblib.dump(pca, os.path.join(model_dir, 'pca.pkl'))
+    timer_end = time()
+    print(f"Model training completed in {timer_end - timer_start:.2f} seconds.")
+    print("Model and scaler have been saved successfully.")
 
-    print(f"Model, vectorizer, and PCA saved to {model_dir}")
-    return model_svm
-''' Mô Hình học sâu'''
+    return model_nb, scaler

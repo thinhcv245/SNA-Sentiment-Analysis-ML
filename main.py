@@ -1,7 +1,7 @@
 import pandas as pd
 import joblib
 from lib import load_data
-from algorithm.algorithm_training import training_native_bayes, load_model,training_SVM,training_SVM_V2, training_SVM_V3
+from algorithm.algorithm_training import training_native_bayes, load_model,training_SVM,training_SVM_V2
 
 def training_native_bayes_v(path_output = "sentiment140/processed_training.1600000.csv",model_dir = 'model/native_bayes/'):
      # Load data
@@ -24,15 +24,6 @@ def training_SVM_v2_update(path_output = "sentiment140/processed_training.160000
 
     '''Tạo model '''
     model = training_SVM_V2(data, model_dir)
-    return model
-def training_SVM_v3_update(path_output = "sentiment140/processed_training.1600000.csv",model_dir = 'model/SVM3/'):
-     # Load data
-    print("Loading training..")
-    data = load_data(path_output)
-    print("Loading training done..")
-
-    '''Tạo model '''
-    model = training_SVM_V3(data, model_dir)
     return model
 def check_data_SVM(new_data):
     model_dir = 'model/SVM/'
@@ -64,14 +55,14 @@ def check_data_native_bayes(new_data):
 if __name__ == '__main__':
     
     
-    #model = training_native_bayes_v()
-    new_data = ["I love this product!", "This is the worst experience I’ve had."]
+    model = training_native_bayes_v()
+    # new_data = ["I love this product!", "This is the worst experience I’ve had."]
     # result = check_data_native_bayes(new_data)
     # print(result)
     #training_SVM_v()
     #training_logistic_regression_v()
-    training_SVM_v2_update()
+    #training_native_bayes_v(path_output = "sentiment140/processed_training.1600000_2.csv",model_dir = 'model/native_bayes/')
 
-    # training_SVM_v3_update()
+    training_SVM_v2_update(path_output = "sentiment140/processed_training.1600000_2.csv",model_dir = 'model/SVM/')
     # result = check_data_SVM(new_data)
     # print(result)

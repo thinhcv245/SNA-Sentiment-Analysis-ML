@@ -5,7 +5,8 @@ data_preprocessing/
 sentiment140/*
 !sentiment140/
 
-
+visualization/*
+!visualization/
 
 # Ignore Python cache files
 __pycache__/
