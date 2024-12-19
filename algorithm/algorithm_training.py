@@ -9,7 +9,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import classification_report, accuracy_score
-from gensim.models import Word2Vec
 from sklearn.naive_bayes import GaussianNB
 from sklearn.preprocessing import StandardScaler
 
@@ -122,7 +121,6 @@ def split_dataset(data, max_features = 5000):
 
 '''Các thuật toán học máy - training'''
 def training_native_bayes(data, model_dir):
-    # Kiểm tra và xử lý các giá trị NaN trong cột clean_text
     # Huấn luyện Naive Bayes
     # Khởi tạo Timer
     timer = Timer()
@@ -218,56 +216,3 @@ def training_SVM_V2(data, model_dir):
 
     print(f"Model, vectorizer, and PCA saved to {model_dir}")
     return model_svm
-
-# Hàm chuyển văn bản thành vector Word2Vec
-def text_to_vector(text, word2vec_model):
-    words = text.lower().split()
-    vectors = [word2vec_model.wv[word] for word in words if word in word2vec_model.wv]
-    return np.mean(vectors, axis=0) if vectors else np.zeros(word2vec_model.vector_size)
-
-
-# Hàm huấn luyện Naive Bayes sử dụng Word2Vec
-def training_naive_bayes_word2vec(data, model_dir, word2vec_model):
-    # Kiểm tra và xử lý các giá trị NaN trong cột clean_text
-    data = data.dropna(subset=["clean_text"])  # Loại bỏ các giá trị NaN
-
-    # Khởi tạo Timer
-    timer_start = time()
-
-    # Chuyển văn bản thành vector Word2Vec
-    data['text_vector'] = data['clean_text'].apply(lambda x: text_to_vector(x, word2vec_model))
-
-    # Chuẩn bị dữ liệu huấn luyện
-    X = np.stack(data['text_vector'].to_numpy())
-    y = data['label'].to_numpy()  # Cột nhãn
-
-    # Tách dữ liệu train-test
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-    # Chuẩn hóa dữ liệu (GaussianNB cần dữ liệu chuẩn hóa)
-    scaler = StandardScaler()
-    X_train = scaler.fit_transform(X_train)
-    X_test = scaler.transform(X_test)
-
-    # Huấn luyện Gaussian Naive Bayes
-    print("Training Naive Bayes with Word2Vec...")
-    model_nb = GaussianNB()
-    model_nb.fit(X_train, y_train)
-
-    # Dự đoán và đánh giá
-    y_pred = model_nb.predict(X_test)
-    print("Classification Report:")
-    from sklearn.metrics import classification_report
-    print(classification_report(y_test, y_pred, target_names=["Negative", "Positive"]))
-
-    # Lưu mô hình và scaler
-    if not os.path.exists(model_dir):
-        os.makedirs(model_dir)
-    joblib.dump(model_nb, os.path.join(model_dir, 'naive_bayes_word2vec.pkl'))  # Lưu mô hình
-    joblib.dump(scaler, os.path.join(model_dir, 'scaler.pkl'))  # Lưu scaler
-
-    timer_end = time()
-    print(f"Model training completed in {timer_end - timer_start:.2f} seconds.")
-    print("Model and scaler have been saved successfully.")
-
-    return model_nb, scaler
