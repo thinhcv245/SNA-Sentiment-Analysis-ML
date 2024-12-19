@@ -250,13 +250,54 @@ def visualization_plot_average_sentence_length_by_hour_circle(data):
 
     plt.close(fig)
 
+def visualization_wordcloud_musk(data):
+    sentiment_map = {'negative': 0, 'neutral': 1, 'positive': 2}
+    data['target'] = data['sentiment'].map(sentiment_map)
+
+    # Tiền xử lý dữ liệu văn bản (thay dấu &amp; bằng & và loại bỏ các ký tự không cần thiết)
+    data['clean_text'] = data['text'].replace({'&amp;': '&'}, regex=True).fillna("").astype(str)
+    # Tạo các văn bản cho từng lớp cảm xúc
+    positive_text = " ".join(data[data['target'] == 2]['clean_text'])
+    negative_text = " ".join(data[data['target'] == 0]['clean_text'])
+    neutral_text = " ".join(data[data['target'] == 1]['clean_text'])
+
+    # Tạo WordCloud cho Positive
+    positive_wc = WordCloud(width=900, height=450, background_color='white', colormap='Greens').generate(positive_text)
+
+    # Tạo WordCloud cho Negative
+    negative_wc = WordCloud(width=900, height=450, background_color='white', colormap='Reds').generate(negative_text)
+
+    # Tạo WordCloud cho Neutral
+    neutral_wc = WordCloud(width=900, height=450, background_color='white', colormap='Blues').generate(neutral_text)
+
+    # Vẽ WordCloud
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(24, 8))  # Tạo 3 subplots
+    ax1.imshow(positive_wc, interpolation='bilinear')
+    ax1.set_title('Positive Word Cloud', fontsize=18)
+    ax1.axis('off')
     
-path_output = "sentiment140/processed_training.1600000.csv"
-data = pd.read_csv(path_output)
+    ax2.imshow(negative_wc, interpolation='bilinear')
+    ax2.set_title('Negative Word Cloud', fontsize=18)
+    ax2.axis('off')
+    
+    ax3.imshow(neutral_wc, interpolation='bilinear')
+    ax3.set_title('Neutral Word Cloud', fontsize=18)
+    ax3.axis('off')
+
+    # Lưu WordCloud
+    plt.savefig("wordcloud_v3.png")
+    plt.show()
+    
+#path_output = "sentiment140/processed_training.1600000.csv"
+#data = pd.read_csv(path_output)
 # visualization_bart_chat(data)
 # visualization_pie_chart(data)
-visualization_wordcloud(data)
+#visualization_wordcloud(data)
 # visualization_sentence_length(data)
 # visualization_gephi_v2(data)
 # visualization_plot_average_sentence_length_by_hour(data)
 # visualization_plot_average_sentence_length_by_hour_circle(data)
+
+path_output = "sentiment140/elon_musk.csv"
+data = pd.read_csv(path_output)
+visualization_wordcloud_musk(data)
