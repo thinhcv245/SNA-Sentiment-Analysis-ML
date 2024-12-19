@@ -146,7 +146,7 @@ def visualization_wordcloud(data):
     ax2.axis('off')
 
     # Lưu WordCloud
-    save_visualization(fig, "visualization/images", "wordcloud.png")
+    save_visualization(fig, "visualization/images", "wordcloud_v1.png")
     plt.close(fig)  # Đóng figure để giải phóng bộ nhớ
     
 def visualization_sentence_length(data):
@@ -251,12 +251,12 @@ def visualization_plot_average_sentence_length_by_hour_circle(data):
     plt.close(fig)
 
     
-path_output = "sentiment140/processed_training.1600000_2.csv"
+path_output = "sentiment140/processed_training.1600000.csv"
 data = pd.read_csv(path_output)
 # visualization_bart_chat(data)
 # visualization_pie_chart(data)
-# visualization_wordcloud(data)
+visualization_wordcloud(data)
 # visualization_sentence_length(data)
 # visualization_gephi_v2(data)
-visualization_plot_average_sentence_length_by_hour(data)
-visualization_plot_average_sentence_length_by_hour_circle(data)
+# visualization_plot_average_sentence_length_by_hour(data)
+# visualization_plot_average_sentence_length_by_hour_circle(data)
