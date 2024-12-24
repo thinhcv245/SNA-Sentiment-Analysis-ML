@@ -1,5 +1,13 @@
-import networkx as nx
+import pandas as pd
 
-G = nx.read_graphml("graph.graphml")
+# Đọc file CSV
+df = pd.read_csv('d.csv')
 
-print(G.number_of_nodes(), G.number_of_edges())
+# Lấy cột đầu tiên (giả sử cột đầu tiên có tên là 'id_column')
+ids = df.iloc[:, 0].tolist()
+
+# Chuyển danh sách thành chuỗi dạng IN (...)
+ids_in_clause = "IN (" + ",".join(map(str, ids)) + ")"
+
+# In kết quả
+print(ids_in_clause)

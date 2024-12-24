@@ -77,6 +77,16 @@ def visualize_graph(G):
     plt.title("Emotion Propagation in Social Network")
     plt.show()
 
+def print_analys(density, clustering, emotion_distribution):
+    from tabulate import tabulate
+    data = [
+        ["Graph Density", density],
+        ["Average Clustering Coefficient", clustering],
+        ["Emotion Distribution", emotion_distribution]
+    ]
+    table = tabulate(data, headers=["Metric", "Value"], tablefmt="pretty")
+    print(table)
+
 # Main Function
 def main():
     # File path to the Sentiment140 dataset
@@ -89,17 +99,19 @@ def main():
     # G = build_graph(data)
     # nx.write_graphml(G, "graph.graphml")
     # return
+    print("Loading graph...")
     G = nx.read_graphml("graph.graphml")
+    density, clustering, emotion_distribution = analyze_graph(G)
+    print_analys(density=density, clustering=clustering, emotion_distribution=emotion_distribution)
+    
     print("Running emotion propagation model...")
     G = propagate_emotion(G, alpha=0.9, beta=0.5, lambda_=0.1, steps=10)
     
     print("Analyzing graph...")
     density, clustering, emotion_distribution = analyze_graph(G)
+    print_analys(density=density, clustering=clustering, emotion_distribution=emotion_distribution)
 
-    print(f"Graph Density: {density}")
-    print(f"Average Clustering Coefficient: {clustering}")
-    print(f"Emotion Distribution: {emotion_distribution}")
-
+    return
     print("Visualizing graph...")
     visualize_graph(G)
 
