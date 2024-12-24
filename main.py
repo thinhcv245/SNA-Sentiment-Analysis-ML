@@ -1,39 +1,13 @@
-import pandas as pd
-import networkx as nx
-import matplotlib.pyplot as plt
+from config import *
+from services.preprocess import load_and_preprocess
+from services.graph_builder import build_graph
+from services.depic_model import depic_propagation
+from services.evaluation import evaluate
 import random
+import networkx as nx
+import numpy as np
+import pandas as pd
 
-# Load Sentiment140 Dataset
-def load_data(file_path):
-    # Load dataset with appropriate column names
-    data = pd.read_csv(file_path, encoding='latin-1', names=['target', 'id', 'date', 'query', 'user', 'text'])
-    # Map target values to emotions (-1: Negative, 0: Neutral, 1: Positive)
-    data['emotion'] = data['target'].map({0: -1, 2: 0, 4: 1})
-    return data
-
-# Build Social Network Graph
-def build_graph(data):
-    G = nx.DiGraph()
-    for _, row in data.iterrows():
-        user = row['user']
-        mentions = [mention.strip('@') for mention in row['text'].split() if mention.startswith('@')]
-        if not G.has_node(user):
-            G.add_node(user)
-
-        # Thêm các cạnh từ user đến mentions và tăng trọng số nếu đã tồn tại
-        for mention in mentions:
-            if not G.has_node(mention):
-                G.add_node(mention)  # Đảm bảo mention cũng là node
-            if not G.has_edge(user, mention):
-                G.add_edge(user, mention, weight=1)
-            else:
-                G[user][mention]['weight'] += 1
-
-        # Gán thuộc tính emotion cho user
-        G.nodes[user]['emotion'] = row['emotion']
-    return G
-
-# Propagation Model
 def propagate_emotion(G, alpha=0.9, beta=0.5, lambda_=0.1, steps=10):
     for _ in range(steps):
         updated_emotions = {}
@@ -51,69 +25,42 @@ def propagate_emotion(G, alpha=0.9, beta=0.5, lambda_=0.1, steps=10):
             G.nodes[node]['emotion'] = new_emotion
     return G
 
-# Analyze the Graph
-def analyze_graph(G):
-    # Calculate density and clustering coefficient
-    density = nx.density(G)
-    clustering = nx.average_clustering(G.to_undirected())
-
-    # Calculate emotion distribution
-    emotions = [G.nodes[node].get('emotion', 0) for node in G.nodes()]
-    emotion_distribution = {
-        'negative': sum(1 for e in emotions if e < 0),
-        'neutral': sum(1 for e in emotions if e == 0),
-        'positive': sum(1 for e in emotions if e > 0),
-    }
-    return density, clustering, emotion_distribution
-
-# Visualize the Graph
-def visualize_graph(G):
-    pos = nx.spring_layout(G)
-    emotions = nx.get_node_attributes(G, 'emotion')
-    colors = ["red" if emotions[node] < 0 else "green" if emotions[node] > 0 else "blue" for node in G.nodes()]
-
-    plt.figure(figsize=(12, 8))
-    nx.draw(G, pos, with_labels=False, node_color=colors, node_size=50, edge_color="gray", alpha=0.7)
-    plt.title("Emotion Propagation in Social Network")
-    plt.show()
-
-def print_analys(density, clustering, emotion_distribution):
-    from tabulate import tabulate
-    data = [
-        ["Graph Density", density],
-        ["Average Clustering Coefficient", clustering],
-        ["Emotion Distribution", emotion_distribution]
-    ]
-    table = tabulate(data, headers=["Metric", "Value"], tablefmt="pretty")
-    print(table)
-
-# Main Function
-def main():
-    # File path to the Sentiment140 dataset
-    file_path = 'data/sentiment140.csv'  # Replace with your file path
-
-    # print("Loading data...")
-    # data = load_data(file_path)
-
-    # print("Building graph...")
-    # G = build_graph(data)
-    # nx.write_graphml(G, "graph.graphml")
-    # return
-    print("Loading graph...")
-    G = nx.read_graphml("graph.graphml")
-    density, clustering, emotion_distribution = analyze_graph(G)
-    print_analys(density=density, clustering=clustering, emotion_distribution=emotion_distribution)
-    
-    print("Running emotion propagation model...")
-    G = propagate_emotion(G, alpha=0.9, beta=0.5, lambda_=0.1, steps=10)
-    
-    print("Analyzing graph...")
-    density, clustering, emotion_distribution = analyze_graph(G)
-    print_analys(density=density, clustering=clustering, emotion_distribution=emotion_distribution)
-
-    return
-    print("Visualizing graph...")
-    visualize_graph(G)
-
 if __name__ == "__main__":
-    main()
+    # Bước 1: Tải và xử lý dữ liệu
+    print("Đang xử lý dữ liệu...")
+    original_data = load_and_preprocess(DATA_PATH, PROCESSED_PATH)
+    original_data.to_csv('original.csv', index=False)
+
+    # Bước 2: Xây dựng đồ thị mạng xã hội
+    print("Đang xây dựng mạng xã hội...")
+    graph = build_graph(PROCESSED_PATH)
+    nx.write_graphml(graph, "graph.graphml")
+
+    # print("Loading graph...")
+    # graph = nx.read_graphml("graph.graphml")
+
+    # Kiểm tra số nút và số cạnh
+    print(f"Number of nodes: {graph.number_of_nodes()}")
+    print(f"Number of edges: {graph.number_of_edges()}")
+    # Kiểm tra degree của các nút
+    degree = [deg for _, deg in graph.degree()]
+    print(f"Average degree: {np.mean(degree):.2f}")
+
+    # Lưu lại cảm xúc ban đầu làm ground truth
+    ground_truth = {row["user"]: row["sentiment"] for _, row in original_data.iterrows()}
+
+    # Bước 3: Thực hiện lan truyền cảm xúc
+    print("Đang thực hiện mô hình DepIC...")
+    graph = depic_propagation(graph, ALPHA, BETA_POS, BETA_NEG, TIME_DECAY, MAX_STEPS)
+    #graph = propagate_emotion(graph, alpha=0.9, beta=0.5, lambda_=0.1, steps=10)
+
+    # Bước 4: Đánh giá mô hình
+    print("Đang đánh giá mô hình...")
+    precision, recall, f1 = evaluate(graph, ground_truth)
+
+    # Hiển thị kết quả
+    print(f"Precision: {precision:.2f}, Recall: {recall:.2f}, F1-score: {f1:.2f}")
+
+    # Kiểm tra trạng thái cảm xúc trước và sau lan truyền
+    for node in list(graph.nodes)[:10]:  # Hiển thị 10 nút đầu tiên
+        print(f"User: {node}, Before: {ground_truth[node]}, After: {graph.nodes[node]['sentiment']}")
