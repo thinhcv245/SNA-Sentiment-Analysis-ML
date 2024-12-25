@@ -44,7 +44,7 @@ if __name__ == "__main__":
         print(f"Number of edges: {graph.number_of_edges()}")
         graphs_for_alpha = []
         for step in range(MAX_STEPS):
-            graph = depic_propagation(graph, alpha, BETA_POS, BETA_NEG, TIME_DECAY, 1)
+            graph = depic_propagation(graph=graph, alpha=alpha, beta_pos=BETA_POS, beta_neg=BETA_NEG, time_decay=TIME_DECAY, max_steps=1)
             graphs_for_alpha.append(graph.copy())
         graphs_over_steps.append(graphs_for_alpha)
 

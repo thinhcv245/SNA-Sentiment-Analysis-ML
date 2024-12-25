@@ -51,7 +51,7 @@ if __name__ == "__main__":
 
     # Bước 3: Thực hiện lan truyền cảm xúc
     print("Đang thực hiện mô hình DepIC...")
-    graph = depic_propagation(graph, ALPHA, BETA_POS, BETA_NEG, TIME_DECAY, MAX_STEPS)
+    graph = depic_propagation(graph=graph, alpha=ALPHA, beta_pos=BETA_POS, beta_neg=BETA_NEG, time_decay=TIME_DECAY, max_steps=MAX_STEPS)
     #graph = propagate_emotion(graph, alpha=0.9, beta=0.5, lambda_=0.1, steps=10)
 
     # Bước 4: Đánh giá mô hình
