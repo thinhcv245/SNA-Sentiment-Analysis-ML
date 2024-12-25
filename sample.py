@@ -23,10 +23,10 @@ def visualize_graph(graph, title="Graph Visualization"):
     sizes = [10 * (graph.out_degree(node) + 1) for node in graph.nodes]
 
     # Vẽ đồ thị
-    pos = nx.spring_layout(graph, seed=42, k=0.15, iterations=50)  # Sử dụng spring layout
+    pos = nx.spring_layout(graph, seed=42, k=0.05, iterations=100)  # Sử dụng spring layout
     
     # Vẽ các cạnh với đường cong
-    nx.draw_networkx_edges(graph, pos, alpha=0.3, edge_color="gray", width=1, style="solid", connectionstyle="arc3,rad=0.1")
+    nx.draw_networkx_edges(graph, pos, alpha=0.3, edge_color="gray", width=1, style="solid", connectionstyle="arc3,rad=0.2")
     
     # Vẽ các nút và nhãn
     nx.draw_networkx_nodes(graph, pos, node_color=colors, node_size=sizes, alpha=0.7)
