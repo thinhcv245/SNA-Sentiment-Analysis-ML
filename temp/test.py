@@ -25,7 +25,7 @@ def propagate_emotions(G, emotions, steps=5):
     return emotion_history
 
 # Chạy mô phỏng lan truyền cảm xúc
-emotion_history = propagate_emotions(G, initial_emotions, steps=10)
+emotion_history = propagate_emotions(G, initial_emotions, steps=5)
 
 # Trực quan hóa cảm xúc qua các bước
 fig, axes = plt.subplots(2, 5, figsize=(15, 6))
