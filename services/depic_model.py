@@ -1,19 +1,19 @@
 import numpy as np
 import networkx as nx
 
-def fPOW(t, t_u, c=1, theta=0.1):
+def fPOW(t, t_u=0, c=1, theta=0.1):
     """Hàm suy giảm Power-Law."""
     if t <= t_u:
         return 0  # Không có suy giảm trước thời điểm kích hoạt
     return ((t - t_u) / c) ** (-theta + 1)
 
-def fNOR(t, t_u, micro=1, sigma=1):
+def fNOR(t, t_u=0, micro=1, sigma=1):
     """Hàm suy giảm Normal (Gaussian)."""
     if t <= t_u:
         return 0  # Không có suy giảm trước thời điểm kích hoạt
     return (1 / (np.sqrt(2 * np.pi) * sigma)) * np.exp(-((t - t_u - micro) ** 2) / (2 * sigma ** 2))
 
-def fRAY(t, t_u, theta=0.1):
+def fRAY(t, t_u=0, theta=0.1):
     """Hàm suy giảm Rayleigh."""
     if t <= t_u:
         return 0  # Không có suy giảm trước thời điểm kích hoạt
