@@ -11,7 +11,7 @@ def evaluate(graph, ground_truth):
     truth = [ground_truth[node] for node in graph.nodes]
 
     # Chuyển đổi predictions thành nhãn rời rạc (-1, 1)
-    predictions = [1 if p > 0 else -1 for p in predictions]
+    predictions = [1 if p > 0 else -1 if p < 0 else 0 for p in predictions]
 
     # Kiểm tra nhãn trong dữ liệu
     unique_truth = set(truth)
