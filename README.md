@@ -1,4 +1,4 @@
-# Phân Tích Cảm Xúc Trên Mạng Xã Hội
+# Phân Tích Cảm Xúc Trên Mạng Xã Hội - graph-tool
 
 Dự án này thực hiện phân tích cảm xúc từ dữ liệu tweet bằng cách sử dụng các kỹ thuật học máy và xử lý ngôn ngữ tự nhiên. Dữ liệu được lấy từ tập dữ liệu Sentiment140, và các phương pháp như TF-IDF, đồ thị và mô phỏng lan truyền cảm xúc được áp dụng để phân tích.
 
